@@ -1,8 +1,10 @@
+// === CONFIG ===
 const SUPABASE_URL = 'https://pcpjsuzfbjbsztepcglw.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_P6awrwvBFtKqWq1Oeihgvg_FFgVBYF7';
 
 // === Inicialização Supabase ===
-const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 
 // DOM
 const btnLogin = document.getElementById('btn-login');
