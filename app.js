@@ -2,7 +2,9 @@
  * SUPABASE CONFIG
  **********************************************/
 const SUPABASE_URL = "https://pcpjsuzfbjbsztepcglw.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_P6awrwvBFtKqWq1Oeihgvg_FFgVBYF7";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjcGpzdXpmYmpic3p0ZXBjZ2x3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMzk1NTEsImV4cCI6MjA3OTgxNTU1MX0.je8roo-yz9dyc5nC52WBKOcO7DyUAUXYa-TdKz6QANY";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_P6awrvwBFtKqWq10eihgvg_FfGvBYF7"; // opcional
+
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
