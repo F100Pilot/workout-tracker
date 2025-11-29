@@ -7,7 +7,10 @@ const SUPABASE_URL = "https://pcpjsuzfbjbsztepcglw.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjcGpzdXpmYmpic3p0ZXBjZ2x3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMzk1NTEsImV4cCI6MjA3OTgxNTU1MX0.je8roo-yz9dyc5nC52WBKOcO7DyUAUXYa-TdKz6QANY";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
 /**********************************************
  * DOM ELEMENTS
@@ -88,7 +91,7 @@ logoutBtn.addEventListener("click", async () => {
 });
 
 /**********************************************
- * AUTH STATE LISTENER
+ * AUTH LISTENER
  **********************************************/
 supabase.auth.onAuthStateChange(async (event, session) => {
   if (session) {
@@ -102,7 +105,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 });
 
 /**********************************************
- * UI
+ * UI FUNCTIONS
  **********************************************/
 function showLoggedInUI() {
   loginBtn.style.display = "none";
@@ -281,4 +284,4 @@ fileInput.addEventListener("change", async (e) => {
   alert("Importação lida (restauro automático em breve)");
 });
 
-}); // ← FINAL DO DOMContentLoaded
+}); // FINAL DO DOMContentLoaded
