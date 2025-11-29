@@ -3,8 +3,6 @@
  **********************************************/
 const SUPABASE_URL = "https://pcpjsuzfbjbsztepcglw.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjcGpzdXpmYmpic3p0ZXBjZ2x3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMzk1NTEsImV4cCI6MjA3OTgxNTU1MX0.je8roo-yz9dyc5nC52WBKOcO7DyUAUXYa-TdKz6QANY";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_P6awrvwBFtKqWq10eihgvg_FfGvBYF7"; // opcional
-
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -28,7 +26,7 @@ const saveProfileBtn = document.getElementById("save-profile");
 
 const eqName = document.getElementById("eq-name");
 const eqNotes = document.getElementById("eq-notes");
-const addEqBtn = document.getElementById("add-eq");
+const addEqBtn = document.getElementById("btn-add-eq");   // <- CORRIGIDO!!
 const equipmentList = document.getElementById("equipment-list");
 
 const sessionsList = document.getElementById("sessions-list");
@@ -44,25 +42,17 @@ const alerts = document.getElementById("alerts");
  * ALERT SYSTEM
  **********************************************/
 function showAlert(msg, type = "info") {
-  alerts.innerHTML = `
-    <div class="alert alert-${type}" role="alert">${msg}</div>
-  `;
+  alerts.innerHTML = `<div class="alert alert-${type}" role="alert">${msg}</div>`;
   setTimeout(() => (alerts.innerHTML = ""), 3000);
 }
 
 /**********************************************
- * RESTORE SESSION (IMPORTANT!)
- * Captures the #access_token from URL after OAuth
+ * RESTORE SESSION (OAuth implicit hash)
  **********************************************/
 async function restoreSession() {
-  const { data: sessionData, error } = await supabase.auth.getSession();
+  const { data: sessionData } = await supabase.auth.getSession();
 
-  if (error) {
-    console.error("Erro ao restaurar sessão:", error);
-    return;
-  }
-
-  if (sessionData.session) {
+  if (sessionData?.session) {
     console.log("Sessão restaurada:", sessionData.session);
     showLoggedInUI();
     await loadUserData();
@@ -73,7 +63,6 @@ async function restoreSession() {
   }
 }
 
-// Call immediately
 restoreSession();
 
 /**********************************************
@@ -102,7 +91,7 @@ logoutBtn.addEventListener("click", async () => {
 });
 
 /**********************************************
- * AUTH CHANGE LISTENER
+ * AUTH STATE CHANGES
  **********************************************/
 supabase.auth.onAuthStateChange(async (event, session) => {
   console.log("Auth:", event);
@@ -118,7 +107,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 });
 
 /**********************************************
- * UI HANDLERS
+ * UI HANDLING
  **********************************************/
 function showLoggedInUI() {
   loginBtn.style.display = "none";
@@ -182,6 +171,7 @@ saveProfileBtn.addEventListener("click", async () => {
   };
 
   const { error } = await supabase.from("profiles").upsert(updates);
+
   if (error) showAlert("Erro ao guardar perfil.", "danger");
   else showAlert("Perfil guardado!", "success");
 });
@@ -210,7 +200,7 @@ async function loadEquipment() {
 }
 
 /**********************************************
- * ADD EQUIPMENT
+ * ADD EQUIPMENT  (CORRIGIDO: usa btn-add-eq)
  **********************************************/
 addEqBtn.addEventListener("click", async () => {
   const name = eqName.value.trim();
@@ -226,7 +216,8 @@ addEqBtn.addEventListener("click", async () => {
     notes: eqNotes.value.trim()
   });
 
-  if (error) return showAlert("Erro ao adicionar equipamento.", "danger");
+  if (error) showAlert("Erro ao adicionar equipamento.", "danger");
+  else showAlert("Equipamento adicionado!", "success");
 
   eqName.value = "";
   eqNotes.value = "";
@@ -258,7 +249,7 @@ async function loadSessions() {
 }
 
 /**********************************************
- * CREATE NEW SESSION
+ * NEW SESSION
  **********************************************/
 newSessionBtn.addEventListener("click", async () => {
   const { data: userData } = await supabase.auth.getUser();
@@ -271,6 +262,7 @@ newSessionBtn.addEventListener("click", async () => {
     data: {}
   });
 
+  showAlert("Treino registado!", "success");
   loadSessions();
 });
 
