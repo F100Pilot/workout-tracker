@@ -2,9 +2,13 @@
  * SUPABASE CONFIG
  **********************************************/
 const SUPABASE_URL = "https://pcpjsuzfbjbsztepcglw.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjcGpzdXpmYmpic3p0ZXBjZ2x3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMzk1NTEsImV4cCI6MjA3OTgxNTU1MX0.je8roo-yz9dyc5nC52WBKOcO7DyUAUXYa-TdKz6QANY";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjcGpzdXpmYmpic3p0ZXBjZ2x3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMzk1NTEsImV4cCI6MjA3OTgxNTU1MX0.je8roo-yz9dyc5nC52WBKOcO7DyUAUXYa-TdKz6QANY";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 
 /**********************************************
  * DOM ELEMENTS
@@ -26,7 +30,8 @@ const saveProfileBtn = document.getElementById("save-profile");
 
 const eqName = document.getElementById("eq-name");
 const eqNotes = document.getElementById("eq-notes");
-const addEqBtn = document.getElementById("btn-add-eq");   // <- CORRIGIDO!!
+const addEqBtn = document.getElementById("btn-add-eq");
+
 const equipmentList = document.getElementById("equipment-list");
 
 const sessionsList = document.getElementById("sessions-list");
@@ -35,7 +40,6 @@ const newSessionBtn = document.getElementById("new-session");
 const exportBtn = document.getElementById("export-data");
 const fileInput = document.getElementById("file-input");
 const downloadLink = document.getElementById("download-link");
-
 const alerts = document.getElementById("alerts");
 
 /**********************************************
@@ -47,13 +51,12 @@ function showAlert(msg, type = "info") {
 }
 
 /**********************************************
- * RESTORE SESSION (OAuth implicit hash)
+ * RESTORE SESSION
  **********************************************/
 async function restoreSession() {
   const { data: sessionData } = await supabase.auth.getSession();
 
   if (sessionData?.session) {
-    console.log("Sessão restaurada:", sessionData.session);
     showLoggedInUI();
     await loadUserData();
     await loadEquipment();
@@ -69,17 +72,12 @@ restoreSession();
  * LOGIN WITH GITHUB
  **********************************************/
 loginBtn.addEventListener("click", async () => {
-  const { error } = await supabase.auth.signInWithOAuth({
+  await supabase.auth.signInWithOAuth({
     provider: "github",
     options: {
-      redirectTo: "https://f100pilot.github.io/workout-tracker/"
-    }
+      redirectTo: "https://f100pilot.github.io/workout-tracker/",
+    },
   });
-
-  if (error) {
-    console.error(error);
-    showAlert("Erro ao iniciar sessão.", "danger");
-  }
 });
 
 /**********************************************
@@ -91,11 +89,9 @@ logoutBtn.addEventListener("click", async () => {
 });
 
 /**********************************************
- * AUTH STATE CHANGES
+ * AUTH STATE LISTENER
  **********************************************/
 supabase.auth.onAuthStateChange(async (event, session) => {
-  console.log("Auth:", event);
-
   if (session) {
     showLoggedInUI();
     await loadUserData();
@@ -107,7 +103,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 });
 
 /**********************************************
- * UI HANDLING
+ * UI FUNCTIONS
  **********************************************/
 function showLoggedInUI() {
   loginBtn.style.display = "none";
@@ -125,8 +121,6 @@ function showLoggedOutUI() {
   profileCard.style.display = "none";
   equipmentCard.style.display = "none";
   workoutCard.style.display = "none";
-
-  userInfo.innerText = "";
 }
 
 /**********************************************
@@ -159,7 +153,6 @@ async function loadUserData() {
 saveProfileBtn.addEventListener("click", async () => {
   const { data: userData } = await supabase.auth.getUser();
   const user = userData?.user;
-  if (!user) return;
 
   const updates = {
     user_id: user.id,
@@ -167,22 +160,21 @@ saveProfileBtn.addEventListener("click", async () => {
     age: parseInt(ageInput.value) || null,
     weight_kg: parseFloat(weightInput.value) || null,
     height_cm: parseInt(heightInput.value) || null,
-    updated_at: new Date()
+    updated_at: new Date(),
   };
 
-  const { error } = await supabase.from("profiles").upsert(updates);
+  await supabase.from("profiles").upsert(updates);
 
-  if (error) showAlert("Erro ao guardar perfil.", "danger");
-  else showAlert("Perfil guardado!", "success");
+  showAlert("Perfil guardado com sucesso!", "success");
 });
 
 /**********************************************
  * LOAD EQUIPMENT
  **********************************************/
 async function loadEquipment() {
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
-  if (!user) return;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data } = await supabase
     .from("equipment")
@@ -200,25 +192,23 @@ async function loadEquipment() {
 }
 
 /**********************************************
- * ADD EQUIPMENT  (CORRIGIDO: usa btn-add-eq)
+ * ADD EQUIPMENT
  **********************************************/
 addEqBtn.addEventListener("click", async () => {
   const name = eqName.value.trim();
   if (!name) return;
 
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
-  if (!user) return;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const { error } = await supabase.from("equipment").insert({
+  await supabase.from("equipment").insert({
     user_id: user.id,
     name: name,
-    notes: eqNotes.value.trim()
+    notes: eqNotes.value.trim(),
   });
 
-  if (error) showAlert("Erro ao adicionar equipamento.", "danger");
-  else showAlert("Equipamento adicionado!", "success");
-
+  showAlert("Equipamento adicionado!", "success");
   eqName.value = "";
   eqNotes.value = "";
   loadEquipment();
@@ -228,9 +218,9 @@ addEqBtn.addEventListener("click", async () => {
  * LOAD SESSIONS
  **********************************************/
 async function loadSessions() {
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
-  if (!user) return;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data } = await supabase
     .from("workouts")
@@ -243,7 +233,7 @@ async function loadSessions() {
   data?.forEach((w) => {
     const div = document.createElement("div");
     div.className = "list-group-item";
-    div.innerText = `Treino em ${new Date(w.date).toLocaleString()}`;
+    div.innerText = `Treino — ${new Date(w.date).toLocaleString()}`;
     sessionsList.appendChild(div);
   });
 }
@@ -252,14 +242,14 @@ async function loadSessions() {
  * NEW SESSION
  **********************************************/
 newSessionBtn.addEventListener("click", async () => {
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
-  if (!user) return;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   await supabase.from("workouts").insert({
     user_id: user.id,
     date: new Date(),
-    data: {}
+    data: {},
   });
 
   showAlert("Treino registado!", "success");
@@ -270,9 +260,9 @@ newSessionBtn.addEventListener("click", async () => {
  * EXPORT JSON
  **********************************************/
 exportBtn.addEventListener("click", async () => {
-  const { data: userData } = await supabase.auth.getUser();
-  const user = userData?.user;
-  if (!user) return;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const profile = await supabase
     .from("profiles")
@@ -306,5 +296,6 @@ fileInput.addEventListener("change", async (e) => {
 
   const text = await file.text();
   const data = JSON.parse(text);
-  alert("Importação lida. (Restauro automático em breve)");
+
+  alert("Importação lida (restauro automático será adicionado).");
 });
