@@ -1,3 +1,5 @@
+document.addEventListener("DOMContentLoaded", () => {
+
 /**********************************************
  * SUPABASE CONFIG
  **********************************************/
@@ -5,10 +7,7 @@ const SUPABASE_URL = "https://pcpjsuzfbjbsztepcglw.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjcGpzdXpmYmpic3p0ZXBjZ2x3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMzk1NTEsImV4cCI6MjA3OTgxNTU1MX0.je8roo-yz9dyc5nC52WBKOcO7DyUAUXYa-TdKz6QANY";
 
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /**********************************************
  * DOM ELEMENTS
@@ -69,7 +68,7 @@ async function restoreSession() {
 restoreSession();
 
 /**********************************************
- * LOGIN WITH GITHUB
+ * LOGIN
  **********************************************/
 loginBtn.addEventListener("click", async () => {
   await supabase.auth.signInWithOAuth({
@@ -103,12 +102,11 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 });
 
 /**********************************************
- * UI FUNCTIONS
+ * UI
  **********************************************/
 function showLoggedInUI() {
   loginBtn.style.display = "none";
   logoutBtn.style.display = "block";
-
   profileCard.style.display = "block";
   equipmentCard.style.display = "block";
   workoutCard.style.display = "block";
@@ -117,14 +115,13 @@ function showLoggedInUI() {
 function showLoggedOutUI() {
   loginBtn.style.display = "block";
   logoutBtn.style.display = "none";
-
   profileCard.style.display = "none";
   equipmentCard.style.display = "none";
   workoutCard.style.display = "none";
 }
 
 /**********************************************
- * LOAD PROFILE
+ * PERFIL
  **********************************************/
 async function loadUserData() {
   const { data: userData } = await supabase.auth.getUser();
@@ -147,34 +144,28 @@ async function loadUserData() {
   heightInput.value = data.height_cm ?? "";
 }
 
-/**********************************************
- * SAVE PROFILE
- **********************************************/
 saveProfileBtn.addEventListener("click", async () => {
   const { data: userData } = await supabase.auth.getUser();
   const user = userData?.user;
 
-  const updates = {
+  await supabase.from("profiles").upsert({
     user_id: user.id,
     name: nameInput.value,
     age: parseInt(ageInput.value) || null,
     weight_kg: parseFloat(weightInput.value) || null,
     height_cm: parseInt(heightInput.value) || null,
     updated_at: new Date(),
-  };
+  });
 
-  await supabase.from("profiles").upsert(updates);
-
-  showAlert("Perfil guardado com sucesso!", "success");
+  showAlert("Perfil guardado!", "success");
 });
 
 /**********************************************
- * LOAD EQUIPMENT
+ * EQUIPAMENTO
  **********************************************/
 async function loadEquipment() {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData?.user;
 
   const { data } = await supabase
     .from("equipment")
@@ -191,16 +182,12 @@ async function loadEquipment() {
   });
 }
 
-/**********************************************
- * ADD EQUIPMENT
- **********************************************/
 addEqBtn.addEventListener("click", async () => {
   const name = eqName.value.trim();
   if (!name) return;
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData?.user;
 
   await supabase.from("equipment").insert({
     user_id: user.id,
@@ -215,12 +202,11 @@ addEqBtn.addEventListener("click", async () => {
 });
 
 /**********************************************
- * LOAD SESSIONS
+ * TREINOS
  **********************************************/
 async function loadSessions() {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData?.user;
 
   const { data } = await supabase
     .from("workouts")
@@ -238,13 +224,9 @@ async function loadSessions() {
   });
 }
 
-/**********************************************
- * NEW SESSION
- **********************************************/
 newSessionBtn.addEventListener("click", async () => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData?.user;
 
   await supabase.from("workouts").insert({
     user_id: user.id,
@@ -252,17 +234,16 @@ newSessionBtn.addEventListener("click", async () => {
     data: {},
   });
 
-  showAlert("Treino registado!", "success");
+  showAlert("Treino criado!", "success");
   loadSessions();
 });
 
 /**********************************************
- * EXPORT JSON
+ * EXPORT
  **********************************************/
 exportBtn.addEventListener("click", async () => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: userData } = await supabase.auth.getUser();
+  const user = userData?.user;
 
   const profile = await supabase
     .from("profiles")
@@ -288,7 +269,7 @@ exportBtn.addEventListener("click", async () => {
 });
 
 /**********************************************
- * IMPORT JSON
+ * IMPORT
  **********************************************/
 fileInput.addEventListener("change", async (e) => {
   const file = e.target.files[0];
@@ -297,5 +278,7 @@ fileInput.addEventListener("change", async (e) => {
   const text = await file.text();
   const data = JSON.parse(text);
 
-  alert("Importação lida (restauro automático será adicionado).");
+  alert("Importação lida (restauro automático em breve)");
 });
+
+}); // ← FINAL DO DOMContentLoaded
